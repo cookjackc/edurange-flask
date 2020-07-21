@@ -5,7 +5,7 @@ from flask_mail import Mail, Message
 from flask import current_app, render_template, session, flash
 from os import environ
 
-from edurange_refactored.scenario_utils import write_container, begin_tf_and_write_providers
+from edurange_refactored.scenario_utils import write_container, begin_tf_and_write_providers, known_types, gather_files
 from edurange_refactored.settings import CELERY_BROKER_URL, CELERY_RESULT_BACKEND
 import os
 import string
@@ -72,9 +72,12 @@ def test_send_async_email(email_data):
     mail.send(msg)
 
 @celery.task(bind=True)
-def CreateScenarioTask(self, name, type, owner, group):
+def CreateScenarioTask(self, name, s_type, owner, group):
     from edurange_refactored.user.models import Scenarios
     app = current_app
+    s_type = s_type.lower()
+    c_names, g_files, s_files, u_files = gather_files(s_type, logger)
+
     logger.info('Executing task id {0.id}, args: {0.args!r} kwargs: {0.kwargs!r}'.format(
         self.request))
     students = {}
@@ -115,9 +118,9 @@ def CreateScenarioTask(self, name, type, owner, group):
 
         begin_tf_and_write_providers(name)
 
-        filenames = ['iamfrustrated']
+        for i, c in enumerate(c_names):
+            write_container(name + '_' + c, usernames, passwords, g_files[i], s_files[i], u_files[i])
 
-        write_container(name, usernames, passwords, filenames)
 
         os.system('terraform init')
         os.chdir('../../..')
