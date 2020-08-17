@@ -4,6 +4,6 @@ Your EDURange scenario has been running too long.
 
 Dear {{ email }},
   Warning:
-    Your EDURange scenario has been running too long.
+    Your EDURange scenario has been running too long. Please log into your account to stop the scenario.
 Sincerely,
 The EDURange Team

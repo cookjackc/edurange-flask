@@ -255,7 +255,7 @@ def destroy(self, sid):
         else:
             raise Exception(f"Could not find scenario")
 
-#global scenarios_dict
+#global scenarios_dict to keep track of status
 scenarios_dict = {}
 @celery.task(bind=True)
 #def scenarioTimeoutWarningEmail(self):
@@ -267,8 +267,10 @@ def scenarioTimeoutWarningEmail(self, arg):
     global scenarios_dict
     for scenario in scenarios:
         for user in users:
+            #Add new scenarios to dict
             if scenario.id in scenarios_dict.keys() == False:
                 scenarios_dict = {scenario.id : scenario.status}
+            #If current status is running and dict scenario running status = true then send warning email
             elif scenario.id in scenarios_dict.keys() and scenarios_dict[scenario.id] == 1 and scenario.status == 1:
                 if user.id == scenario.owner_id:
                     email = user.email
@@ -281,6 +283,7 @@ def scenarioTimeoutWarningEmail(self, arg):
                     msg.body = render_template('utils/scenario_timeout_warning_email.txt', email=email_data['email'], _external=True)
                     msg.html = render_template('utils/scenario_timeout_warning_email.html', email=email_data['email'], _external=True)
                     mail.send(msg)
+            #update dict with current status
             scenarios_dict[scenario.id] = scenario.status
     #    print(arg)
     #email_data = {'subject': 'WARNING: Scenario Running Too Long', 'to': 'selenawalshsmith@gmail.com', 'body':'WARNING: Scenario Running Too Long'}
