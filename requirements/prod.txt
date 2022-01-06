@@ -41,6 +41,6 @@ Flask-DebugToolbar==0.10.1
 environs==7.2.0
 
 #
-celery==4.4.6
+celery==5.2.2
 redis==3.5.3
 flask_table==0.5.0
